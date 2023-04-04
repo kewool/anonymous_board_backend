@@ -1,9 +1,12 @@
-import { ConflictException, Injectable } from "@nestjs/common";
-import { MailerService } from "@nestjs-modules/mailer";
+import { Injectable } from "@nestjs/common";
+import { InjectRepository } from "@nestjs/typeorm";
+import { Repository } from "typeorm";
+import { BoardEntity } from "./board.entity";
 
 @Injectable()
 export class BoardService {
-  constructor(private readonly mailerService: MailerService) {}
-
-  
+  constructor(
+    @InjectRepository(BoardEntity)
+    private readonly boardRepository: Repository<BoardEntity>,
+  ) {}
 }

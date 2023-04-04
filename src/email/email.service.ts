@@ -1,28 +1,20 @@
-import { ConflictException, Injectable } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
 import { MailerService } from "@nestjs-modules/mailer";
 
 @Injectable()
 export class EmailService {
   constructor(private readonly mailerService: MailerService) {}
 
-  sendHello(): string {
+  sendValidationEmail(email: string, code: string): boolean {
     this.mailerService
       .sendMail({
-        to: "kkttyy324@gmail.com",
-        subject: "Testing Nest MailerModule ✔",
-        text: "welcome",
-        html: "<b>welcome</b>",
+        to: email,
+        subject: "선린숲 인증코드",
+        html: `<h1>인증코드: ${code}</h1>`,
       })
-      .then((result) => {
-        console.log(result);
-      })
-      .catch((err) => {
-        console.log(err);
+      .catch(() => {
+        return false;
       });
-    return process.env.MAIL_PW;
-  }
-
-  sendValidationEmail(email: string, code: string): boolean {
     return true;
   }
 }

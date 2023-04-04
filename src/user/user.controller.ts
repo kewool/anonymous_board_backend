@@ -9,7 +9,6 @@ import {
 } from "@nestjs/common";
 import { UserService } from "./user.service";
 import { UserEntity } from "./user.entity";
-import { AccessGuard } from "src/auth/access.guard";
 import { AdminGuard } from "src/auth/admin.guard";
 
 @Controller({
@@ -20,7 +19,6 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Get()
-  @UseGuards(AccessGuard)
   getMyData(@Req() req): Promise<UserEntity> {
     return this.userService.getMyData(this.userService.getUUIDFromReq(req));
   }

@@ -3,6 +3,7 @@ import { ConfigService } from "@nestjs/config";
 import { NestFactory } from "@nestjs/core";
 import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
 import cookieParser from "cookie-parser";
+import session from "express-session";
 import { AppModule } from "./app.module";
 
 async function swagger(app: INestApplication) {
@@ -22,6 +23,13 @@ async function bootstrap() {
 
   const config = app.get(ConfigService);
   app.use(cookieParser());
+  app.use(
+    session({
+      secret: config.get<string>("SESSION_SECRET"),
+      resave: false,
+      saveUninitialized: false,
+    }),
+  );
   app.enableCors({
     origin: config.get<string>("FRONTEND_URL"),
     methods: "GET,HEAD,PUT,PATCH,POST,DELETE",

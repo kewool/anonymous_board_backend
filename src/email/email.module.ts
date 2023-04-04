@@ -2,7 +2,6 @@ import { Module } from "@nestjs/common";
 import { HandlebarsAdapter } from "@nestjs-modules/mailer/dist/adapters/handlebars.adapter";
 import { MailerModule } from "@nestjs-modules/mailer";
 import { EmailService } from "./email.service";
-import { EmailController } from "./email.controller";
 
 @Module({
   imports: [
@@ -30,7 +29,7 @@ import { EmailController } from "./email.controller";
       }),
     }),
   ],
-  controllers: [EmailController],
+  controllers: [],
   providers: [EmailService],
 })
 export class EmailModule {}

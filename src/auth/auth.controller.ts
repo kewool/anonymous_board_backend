@@ -7,12 +7,17 @@ import {
   HttpCode,
   Req,
   Res,
+  HttpStatus,
+  Session,
 } from "@nestjs/common";
-import { ConfigService } from "@nestjs/config";
 import { AuthGuard } from "@nestjs/passport";
+import { Repository } from "typeorm";
+import { v4 } from "uuid";
 import { AuthService } from "./auth.service";
-import { CreateUser } from "src/user/user.interface";
 import { UserEntity } from "src/user/user.entity";
+import { RequestCode } from "./auth.interface";
+import { EmailService } from "src/email/email.service";
+import { InjectRepository } from "@nestjs/typeorm";
 
 @Controller({
   path: "auth",
@@ -20,8 +25,10 @@ import { UserEntity } from "src/user/user.entity";
 })
 export class AuthController {
   constructor(
+    @InjectRepository(UserEntity)
+    private readonly userRepository: Repository<UserEntity>,
     private readonly authService: AuthService,
-    private readonly config: ConfigService,
+    private readonly emailService: EmailService,
   ) {}
 
   @Get()
@@ -29,39 +36,35 @@ export class AuthController {
     return this.authService.getHello();
   }
 
-  @Post("register")
-  async createUser(@Body() userData: CreateUser): Promise<UserEntity> {
-    return this.authService.createUser(userData);
+  @Post("request")
+  @HttpCode(200)
+  async request(@Body() body: RequestCode, @Res() res) {
+    const user = await this.authService.getUserByEmail(body.user_email);
+    if (user) {
+      user.user_code = v4();
+      await this.userRepository.update(
+        { user_uuid: user.user_uuid },
+        { user_code: user.user_code },
+      );
+    } else {
+      user.user_email = body.user_email;
+      user.user_code = v4();
+      await this.userRepository.save(user);
+    }
+    this.emailService.sendValidationEmail(user.user_email, user.user_code);
+    res.status(HttpStatus.OK).json({ success: true });
   }
 
-  @Post("login")
+  @Get("validate")
   @HttpCode(200)
   @UseGuards(AuthGuard("local"))
-  async login(@Req() req, @Res({ passthrough: true }) res) {
+  async login(@Req() req, @Res() res, @Session() session: Record<string, any>) {
     const { user } = req;
-    const refreshToken = await this.authService.getRefreshToken(user.user_id);
-    res.cookie("refreshToken", refreshToken, {
-      domain: this.config.get("SERVICE_DOMAIN"),
-      httpOnly: this.config.get("NODE_ENV") === "production",
-      secure: this.config.get("NODE_ENV") === "production",
-      maxAge: 60 * 60 * 24 * 7 * 1000,
-    });
-    return { success: true };
-  }
-
-  @Get("refresh")
-  @UseGuards(AuthGuard("jwt-refresh-token"))
-  async refreshAccessToken(@Req() req) {
-    return this.authService.getAccessToken(req.cookies.refreshToken);
-  }
-
-  @Get("logout")
-  @UseGuards(AuthGuard("jwt-refresh-token"))
-  async logout(@Req() req, @Res({ passthrough: true }) res) {
-    const COOKIE_OPTION = this.authService.deleteRefreshToken(
-      req.cookies.refreshToken,
+    session.uuid = user.user_uuid;
+    this.userRepository.update(
+      { user_uuid: user.user_uuid },
+      { user_code: null },
     );
-    res.clearCookie("refreshToken", COOKIE_OPTION);
-    return { success: true };
+    res.status(HttpStatus.OK).json({ validate: session !== undefined });
   }
 }

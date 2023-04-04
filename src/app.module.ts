@@ -4,6 +4,7 @@ import { DatabaseModule } from "./database.module";
 import { AuthModule } from "./auth/auth.module";
 import { UserModule } from "./user/user.module";
 import { EmailModule } from "./email/email.module";
+import { BoardModule } from "./board/board.module";
 
 @Module({
   imports: [
@@ -11,6 +12,7 @@ import { EmailModule } from "./email/email.module";
     AuthModule,
     UserModule,
     EmailModule,
+    BoardModule,
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: [`.env`],
