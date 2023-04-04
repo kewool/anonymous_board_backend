@@ -8,6 +8,7 @@ import {
   HttpCode,
 } from "@nestjs/common";
 import { BoardService } from "./board.service";
+import { SessionGuard } from "src/auth/session.guard";
 import { AdminGuard } from "src/auth/admin.guard";
 
 @Controller({
