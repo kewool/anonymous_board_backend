@@ -1,3 +1,7 @@
-export interface RequestCode {
-  user_email: string;
+export interface ValidateResponse {
+  validate: boolean;
+}
+
+export interface SuccessResponse {
+  success: boolean;
 }

@@ -1,10 +1,16 @@
-import { INestApplication, Logger, VersioningType } from "@nestjs/common";
+import {
+  INestApplication,
+  Logger,
+  VersioningType,
+  ValidationPipe,
+} from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { NestFactory } from "@nestjs/core";
 import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
 import cookieParser from "cookie-parser";
 import session from "express-session";
 import { AppModule } from "./app.module";
+import passport from "passport";
 
 async function swagger(app: INestApplication) {
   const config = new DocumentBuilder()
@@ -26,10 +32,13 @@ async function bootstrap() {
   app.use(
     session({
       secret: config.get<string>("SESSION_SECRET"),
-      resave: false,
-      saveUninitialized: false,
+      resave: true,
+      saveUninitialized: true,
     }),
   );
+  app.use(passport.initialize());
+  app.use(passport.session());
+
   app.enableCors({
     origin: config.get<string>("FRONTEND_URL"),
     methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
@@ -38,6 +47,12 @@ async function bootstrap() {
     optionsSuccessStatus: 204,
     allowedHeaders: "Content-Type, Authorization, Accept",
   });
+
+  app.useGlobalPipes(
+    new ValidationPipe({
+      disableErrorMessages: config.get<string>("NODE_ENV") === "production",
+    }),
+  );
 
   if (config.get<string>("NODE_ENV") === "development") {
     await swagger(app);

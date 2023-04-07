@@ -8,6 +8,7 @@ import { UserEntity } from "src/user/user.entity";
 import { LocalStrategy } from "./local.strategy";
 import { AdminStrategy } from "./admin.strategy";
 import { EmailService } from "src/email/email.service";
+import { SessionSerializer } from "./session.serializer";
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { EmailService } from "src/email/email.service";
     LocalStrategy,
     ConfigService,
     AdminStrategy,
+    SessionSerializer,
   ],
 })
 export class AuthModule {}

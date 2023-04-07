@@ -17,17 +17,18 @@ export class AuthService {
   async validateUser(email: string, code: string): Promise<UserEntity> {
     const user = await this.getUserByEmail(email);
     if (user && code == user.user_code) {
+      delete user.user_code;
       return user;
     }
     return null;
   }
 
   async getUUIDByEmail(user_email: string): Promise<string> {
-    const user = await this.userRepository.findOne({
+    const { user_uuid } = await this.userRepository.findOne({
       where: { user_email },
       select: ["user_uuid"],
     });
-    return user.user_uuid;
+    return user_uuid;
   }
 
   async getUserByUUID(user_uuid: string): Promise<UserEntity> {
@@ -48,7 +49,11 @@ export class AuthService {
     });
   }
 
-  checkSession(session: Record<string, any>): boolean {
-    return session.user_uuid ? true : false;
+  async setUserCode(user_uuid: string, user_code: string): Promise<void> {
+    await this.userRepository.update({ user_uuid }, { user_code });
+  }
+
+  async registerUser(user: UserEntity): Promise<void> {
+    await this.userRepository.save(user);
   }
 }

@@ -21,7 +21,7 @@ export class UserEntity {
   @PrimaryGeneratedColumn("uuid")
   user_uuid: string;
 
-  @Column({ length: 254, nullable: false, unique: true, select: false })
+  @Column({ length: 254, nullable: false, unique: true })
   @IsEmail()
   user_email: string;
 

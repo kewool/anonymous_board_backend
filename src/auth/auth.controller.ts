@@ -10,14 +10,14 @@ import {
   HttpStatus,
   Session,
 } from "@nestjs/common";
-import { AuthGuard } from "@nestjs/passport";
-import { Repository } from "typeorm";
+import { ConfigService } from "@nestjs/config";
 import { v4 } from "uuid";
 import { AuthService } from "./auth.service";
-import { UserEntity } from "src/user/user.entity";
-import { RequestCode } from "./auth.interface";
 import { EmailService } from "src/email/email.service";
-import { InjectRepository } from "@nestjs/typeorm";
+import { UserEmail } from "src/user/user.dto";
+import { SuccessResponse, ValidateResponse } from "./auth.interface";
+import { LocalGuard } from "./local.guard";
+import { UserEntity } from "src/user/user.entity";
 
 @Controller({
   path: "auth",
@@ -25,10 +25,9 @@ import { InjectRepository } from "@nestjs/typeorm";
 })
 export class AuthController {
   constructor(
-    @InjectRepository(UserEntity)
-    private readonly userRepository: Repository<UserEntity>,
     private readonly authService: AuthService,
     private readonly emailService: EmailService,
+    private readonly config: ConfigService,
   ) {}
 
   @Get()
@@ -38,33 +37,30 @@ export class AuthController {
 
   @Post("request")
   @HttpCode(200)
-  async request(@Body() body: RequestCode, @Res() res) {
-    const user = await this.authService.getUserByEmail(body.user_email);
+  async request(@Body() { user_email }: UserEmail): Promise<SuccessResponse> {
+    let user = await this.authService.getUserByEmail(user_email);
     if (user) {
       user.user_code = v4();
-      await this.userRepository.update(
-        { user_uuid: user.user_uuid },
-        { user_code: user.user_code },
-      );
+      await this.authService.setUserCode(user.user_uuid, user.user_code);
     } else {
-      user.user_email = body.user_email;
+      user = new UserEntity();
+      user.user_email = user_email;
       user.user_code = v4();
-      await this.userRepository.save(user);
+      await this.authService.registerUser(user);
     }
     this.emailService.sendValidationEmail(user.user_email, user.user_code);
-    res.status(HttpStatus.OK).json({ success: true });
+    return { success: true };
   }
 
   @Get("validate")
   @HttpCode(200)
-  @UseGuards(AuthGuard("local"))
-  async login(@Req() req, @Res() res, @Session() session: Record<string, any>) {
+  @UseGuards(LocalGuard)
+  async validate(
+    @Req() req,
+    @Session() session: Record<string, any>,
+  ): Promise<ValidateResponse> {
     const { user } = req;
-    session.uuid = user.user_uuid;
-    this.userRepository.update(
-      { user_uuid: user.user_uuid },
-      { user_code: null },
-    );
-    res.status(HttpStatus.OK).json({ validate: session !== undefined });
+    //await this.authService.setUserCode(user.user_uuid, null);
+    return { validate: session !== undefined };
   }
 }

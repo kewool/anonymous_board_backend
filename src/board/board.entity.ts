@@ -11,6 +11,7 @@ import {
   PrimaryGeneratedColumn,
   DeleteDateColumn,
   ManyToOne,
+  JoinColumn,
 } from "typeorm";
 import { UserEntity } from "../user/user.entity";
 
@@ -25,6 +26,9 @@ export class BoardEntity {
   @Column({ type: "text", nullable: false })
   board_content: string;
 
+  @Column({ type: "varchar", length: 255, nullable: false })
+  board_writer_name: string;
+
   @Column({ type: "varchar", length: 255, nullable: false, select: false })
   board_password: string;
 
@@ -38,5 +42,6 @@ export class BoardEntity {
   board_deleted_at: Date;
 
   @ManyToOne(() => UserEntity, (user) => user.user_boards)
+  @JoinColumn({ name: "board_writer_uuid" })
   board_writer: UserEntity;
 }

@@ -7,9 +7,11 @@ import {
   Req,
   HttpCode,
 } from "@nestjs/common";
+import { Request } from "express";
 import { UserService } from "./user.service";
 import { UserEntity } from "./user.entity";
 import { AdminGuard } from "src/auth/admin.guard";
+import { UserEmail } from "./user.dto";
 
 @Controller({
   path: "user",
@@ -17,11 +19,6 @@ import { AdminGuard } from "src/auth/admin.guard";
 })
 export class UserController {
   constructor(private readonly userService: UserService) {}
-
-  @Get()
-  getMyData(@Req() req): Promise<UserEntity> {
-    return this.userService.getMyData(this.userService.getUUIDFromReq(req));
-  }
 
   @Get("findall")
   @UseGuards(AdminGuard)
@@ -32,7 +29,7 @@ export class UserController {
   @Post("fetch")
   @HttpCode(200)
   @UseGuards(AdminGuard)
-  async fetchUser(@Body() body): Promise<UserEntity> {
-    return this.userService.fetchUser(body.user_id);
+  async fetchUser(@Body() { user_email }: UserEmail): Promise<UserEntity> {
+    return this.userService.fetchUser(user_email);
   }
 }
