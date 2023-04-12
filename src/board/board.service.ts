@@ -1,9 +1,10 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, UnauthorizedException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { BoardEntity } from "./board.entity";
 import { CreateBoard, UpdateBoard } from "./board.interface";
 import { UserEntity } from "src/user/user.entity";
+import { SuccessResponse, ValidateResponse } from "src/types";
 @Injectable()
 export class BoardService {
   constructor(
@@ -32,37 +33,38 @@ export class BoardService {
     return await this.boardRepository.save(board);
   }
 
-  async updateBoard(board_id: number, board: UpdateBoard): Promise<boolean> {
-    const validated = await this.validatePassword(
+  async updateBoard(board_id: number, board: UpdateBoard): Promise<any> {
+    const { validate } = await this.validatePassword(
       board_id,
       board.board_password,
     );
-    if (validated) {
+    if (validate) {
       await this.boardRepository.update(board_id, board);
-      return true;
+      return { success: true };
     }
-    return false;
+    throw new UnauthorizedException();
   }
 
   async deleteBoard(
     board_id: number,
     board_password: string,
-  ): Promise<boolean> {
-    const validated = await this.validatePassword(board_id, board_password);
-    if (validated) {
-      await this.boardRepository.delete(board_id);
-      return true;
+  ): Promise<SuccessResponse> {
+    const { validate } = await this.validatePassword(board_id, board_password);
+    if (validate) {
+      await this.boardRepository.softDelete(board_id);
+      return { success: true };
     }
-    return false;
+    throw new UnauthorizedException();
   }
 
   async validatePassword(
     board_id: number,
     board_password: string,
-  ): Promise<BoardEntity> {
+  ): Promise<ValidateResponse> {
     const board = await this.boardRepository.findOne({
       where: { board_id, board_password },
     });
-    return board;
+    if (board) return { validate: true };
+    return { validate: false };
   }
 }

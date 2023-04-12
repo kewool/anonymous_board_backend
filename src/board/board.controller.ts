@@ -8,17 +8,23 @@ import {
   Patch,
   Param,
   Delete,
-  ParseIntPipe,
   HttpCode,
   Session,
+  UnauthorizedException,
 } from "@nestjs/common";
 import { BoardService } from "./board.service";
 import { SessionGuard } from "src/auth/session.guard";
 import { AdminGuard } from "src/auth/admin.guard";
 import { BoardEntity } from "./board.entity";
-import { CreateBoard, UpdateBoard, ValidatePassword } from "./board.dto";
-import { RequestWithUser } from "src/types";
+import {
+  BoardPassword,
+  CreateBoard,
+  UpdateBoard,
+  ValidatePassword,
+} from "./board.dto";
+import { RequestWithUser, ValidateResponse } from "src/types";
 import { UserEntity } from "src/user/user.entity";
+import { SuccessResponse } from "src/types";
 
 @Controller({
   path: "board",
@@ -41,8 +47,16 @@ export class BoardController {
     return await this.boardService.getBoardListByUser(user_uuid);
   }
 
+  @Get("test")
+  @UseGuards(SessionGuard)
+  async test(@Session() session) {
+    return session;
+  }
+
   @Get(":board_id")
-  async getBoardByID(@Body("board_id") board_id: number): Promise<BoardEntity> {
+  async getBoardByID(
+    @Param("board_id") board_id: number,
+  ): Promise<BoardEntity> {
     return await this.boardService.getBoardByID(board_id);
   }
 
@@ -61,26 +75,30 @@ export class BoardController {
   @Patch(":board_id")
   @UseGuards(SessionGuard)
   async updateBoard(
-    @Param("board_id", ParseIntPipe) board_id,
+    @Param("board_id") board_id: number,
     @Body() board: UpdateBoard,
-  ): Promise<boolean> {
-    return await this.boardService.updateBoard(board_id, board);
+  ): Promise<SuccessResponse> {
+    if (board.board_password)
+      return await this.boardService.updateBoard(board_id, board);
+    throw new UnauthorizedException();
   }
 
   @Delete(":board_id")
   @UseGuards(SessionGuard)
   async deleteBoard(
-    @Param("board_id", ParseIntPipe) board_id,
-    @Body("board_password") board_password: string,
-  ): Promise<boolean> {
-    return await this.boardService.deleteBoard(board_id, board_password);
+    @Param("board_id") board_id: number,
+    @Body("board_password") { board_password }: BoardPassword,
+  ): Promise<SuccessResponse> {
+    if (board_password)
+      return await this.boardService.deleteBoard(board_id, board_password);
+    throw new UnauthorizedException();
   }
 
   @Post("validate")
-  @HttpCode(200)
+  @UseGuards(SessionGuard)
   async validatePassword(
     @Body() { board_id, board_password }: ValidatePassword,
-  ): Promise<BoardEntity> {
+  ): Promise<ValidateResponse> {
     return await this.boardService.validatePassword(board_id, board_password);
   }
 }

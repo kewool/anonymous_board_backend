@@ -50,7 +50,9 @@ async function bootstrap() {
 
   app.useGlobalPipes(
     new ValidationPipe({
+      whitelist: true,
       disableErrorMessages: config.get<string>("NODE_ENV") === "production",
+      transform: true,
     }),
   );
 

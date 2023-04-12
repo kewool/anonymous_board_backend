@@ -2,6 +2,7 @@ import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { UserEntity } from "src/user/user.entity";
+import { UserUUID } from "./auth.interface";
 
 @Injectable()
 export class AuthService {
@@ -14,11 +15,11 @@ export class AuthService {
     return "Hello World!";
   }
 
-  async validateUser(email: string, code: string): Promise<UserEntity> {
+  async validateUser(email: string, code: string): Promise<UserUUID> {
     const user = await this.getUserByEmail(email);
     if (user && code == user.user_code) {
-      delete user.user_code;
-      return user;
+      const { user_uuid } = user;
+      return { user_uuid };
     }
     return null;
   }

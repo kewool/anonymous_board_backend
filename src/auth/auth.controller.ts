@@ -15,7 +15,7 @@ import { v4 } from "uuid";
 import { AuthService } from "./auth.service";
 import { EmailService } from "src/email/email.service";
 import { UserEmail } from "src/user/user.dto";
-import { SuccessResponse, ValidateResponse } from "./auth.interface";
+import { SuccessResponse, ValidateResponse } from "src/types";
 import { LocalGuard } from "./local.guard";
 import { UserEntity } from "src/user/user.entity";
 

@@ -1,4 +1,10 @@
-import { IsEmpty, IsNotEmpty, IsNumber, IsString } from "class-validator";
+import {
+  IsEmpty,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsString,
+} from "class-validator";
 
 export class CreateBoard {
   @IsEmpty()
@@ -31,7 +37,7 @@ export class UpdateBoard {
   board_content: string;
 
   @IsString()
-  @IsNotEmpty()
+  @IsOptional()
   board_password: string;
 }
 
@@ -40,6 +46,12 @@ export class ValidatePassword {
   @IsNotEmpty()
   board_id: number;
 
+  @IsString()
+  @IsNotEmpty()
+  board_password: string;
+}
+
+export class BoardPassword {
   @IsString()
   @IsNotEmpty()
   board_password: string;

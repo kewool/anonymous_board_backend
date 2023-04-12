@@ -1,7 +1,3 @@
-export interface ValidateResponse {
-  validate: boolean;
-}
-
-export interface SuccessResponse {
-  success: boolean;
+export interface UserUUID {
+  user_uuid: string;
 }
