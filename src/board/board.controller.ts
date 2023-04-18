@@ -20,14 +20,13 @@ import {
   BoardPassword,
   CreateBoard,
   UpdateBoard,
-  ValidatePassword,
+  ValidateBoardPassword,
 } from "./board.dto";
 import { RequestWithUser, ValidateResponse } from "src/types";
-import { UserEntity } from "src/user/user.entity";
 import { SuccessResponse } from "src/types";
 
 @Controller({
-  path: "board",
+  path: "boards",
   version: "1",
 })
 export class BoardController {
@@ -45,12 +44,6 @@ export class BoardController {
     @Req() { user: { user_uuid } }: RequestWithUser,
   ): Promise<BoardEntity[]> {
     return await this.boardService.getBoardListByUser(user_uuid);
-  }
-
-  @Get("test")
-  @UseGuards(SessionGuard)
-  async test(@Session() session) {
-    return session;
   }
 
   @Get(":board_id")
@@ -87,7 +80,7 @@ export class BoardController {
   @UseGuards(SessionGuard)
   async deleteBoard(
     @Param("board_id") board_id: number,
-    @Body("board_password") { board_password }: BoardPassword,
+    @Body() { board_password }: BoardPassword,
   ): Promise<SuccessResponse> {
     if (board_password)
       return await this.boardService.deleteBoard(board_id, board_password);
@@ -96,9 +89,12 @@ export class BoardController {
 
   @Post("validate")
   @UseGuards(SessionGuard)
-  async validatePassword(
-    @Body() { board_id, board_password }: ValidatePassword,
+  async validateBoardPassword(
+    @Body() { board_id, board_password }: ValidateBoardPassword,
   ): Promise<ValidateResponse> {
-    return await this.boardService.validatePassword(board_id, board_password);
+    return await this.boardService.validateBoardPassword(
+      board_id,
+      board_password,
+    );
   }
 }

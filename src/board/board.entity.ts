@@ -2,7 +2,7 @@ import {
   CREATE_DATE_COLUMN_OPTIONS,
   UPDATE_DATE_COLUMN_OPTIONS,
   DELETE_DATE_COLUMN_OPTIONS,
-} from "../constants/column_options";
+} from "src/constants/column_options";
 import {
   Column,
   Entity,
@@ -12,8 +12,10 @@ import {
   DeleteDateColumn,
   ManyToOne,
   JoinColumn,
+  OneToMany,
 } from "typeorm";
-import { UserEntity } from "../user/user.entity";
+import { UserEntity } from "src/user/user.entity";
+import { CommentEntity } from "src/comment/comment.entity";
 
 @Entity("boards")
 export class BoardEntity {
@@ -43,5 +45,8 @@ export class BoardEntity {
 
   @ManyToOne(() => UserEntity, (user) => user.user_boards)
   @JoinColumn({ name: "board_writer_uuid" })
-  board_writer: UserEntity;
+  board_writer_uuid: UserEntity;
+
+  @OneToMany(() => CommentEntity, (comment) => comment.comment_board)
+  board_comments: CommentEntity[];
 }

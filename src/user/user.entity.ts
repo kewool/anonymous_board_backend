@@ -3,18 +3,18 @@ import {
   CREATE_DATE_COLUMN_OPTIONS,
   UPDATE_DATE_COLUMN_OPTIONS,
   DELETE_DATE_COLUMN_OPTIONS,
-} from "../constants/column_options";
+} from "src/constants/column_options";
 import {
   Column,
   CreateDateColumn,
   Entity,
   UpdateDateColumn,
   PrimaryGeneratedColumn,
-  BeforeInsert,
   DeleteDateColumn,
   OneToMany,
 } from "typeorm";
-import { BoardEntity } from "../board/board.entity";
+import { BoardEntity } from "src/board/board.entity";
+import { CommentEntity } from "src/comment/comment.entity";
 
 @Entity("users")
 export class UserEntity {
@@ -40,13 +40,9 @@ export class UserEntity {
   @DeleteDateColumn(DELETE_DATE_COLUMN_OPTIONS)
   user_deleted_at: Date;
 
-  @OneToMany(() => BoardEntity, (board) => board.board_writer)
+  @OneToMany(() => BoardEntity, (board) => board.board_writer_uuid)
   user_boards: BoardEntity[];
 
-  @BeforeInsert()
-  nullUUID(): void {
-    if (this.user_uuid) {
-      delete this.user_uuid;
-    }
-  }
+  @OneToMany(() => CommentEntity, (comment) => comment.comment_writer)
+  user_comments: CommentEntity[];
 }

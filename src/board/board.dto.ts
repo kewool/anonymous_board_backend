@@ -41,18 +41,14 @@ export class UpdateBoard {
   board_password: string;
 }
 
-export class ValidatePassword {
-  @IsNumber()
-  @IsNotEmpty()
-  board_id: number;
-
+export class BoardPassword {
   @IsString()
   @IsNotEmpty()
   board_password: string;
 }
 
-export class BoardPassword {
-  @IsString()
+export class ValidateBoardPassword extends BoardPassword {
+  @IsNumber()
   @IsNotEmpty()
-  board_password: string;
+  board_id: number;
 }
