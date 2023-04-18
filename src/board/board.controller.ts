@@ -7,6 +7,7 @@ import {
   Req,
   Patch,
   Param,
+  Query,
   Delete,
   HttpCode,
   Session,
@@ -34,8 +35,11 @@ export class BoardController {
 
   @Get()
   @UseGuards(SessionGuard)
-  async getBoardList(): Promise<BoardEntity[]> {
-    return await this.boardService.getBoardList();
+  async getBoardList(
+    @Query("page") page: number,
+    @Query("count") count: number,
+  ): Promise<BoardEntity[]> {
+    return await this.boardService.getBoardList(page, count);
   }
 
   @Get("user")

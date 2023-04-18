@@ -4,6 +4,8 @@ import { Repository } from "typeorm";
 import { BoardEntity } from "./board.entity";
 import { CreateBoard, UpdateBoard } from "./board.interface";
 import { SuccessResponse, ValidateResponse } from "src/types";
+import { DEFAULT_BOARD_COUNT } from "src/constants";
+
 @Injectable()
 export class BoardService {
   constructor(
@@ -11,7 +13,10 @@ export class BoardService {
     private readonly boardRepository: Repository<BoardEntity>,
   ) {}
 
-  async getBoardList(): Promise<BoardEntity[]> {
+  async getBoardList(
+    page = 1,
+    count = DEFAULT_BOARD_COUNT,
+  ): Promise<BoardEntity[]> {
     return await this.boardRepository.find({
       select: [
         "board_id",
@@ -19,6 +24,8 @@ export class BoardService {
         "board_writer_name",
         "board_created_date",
       ],
+      take: count,
+      skip: (page - 1) * count,
     });
   }
 

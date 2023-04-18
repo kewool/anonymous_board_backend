@@ -22,7 +22,7 @@ export class CommentEntity {
   @PrimaryGeneratedColumn("increment")
   comment_id: number;
 
-  @Column({ type: "text", length: 2000, nullable: false })
+  @Column({ type: "text", nullable: false })
   comment_content: string;
 
   @Column({ type: "varchar", length: 255, nullable: false })

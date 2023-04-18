@@ -5,10 +5,12 @@ import {
   IsObject,
   IsOptional,
   IsString,
+  MaxLength,
 } from "class-validator";
 
 export class CreateComment {
   @IsString()
+  @MaxLength(2000)
   @IsNotEmpty()
   comment_content: string;
 
@@ -23,6 +25,7 @@ export class CreateComment {
 
 export class UpdateComment {
   @IsString()
+  @MaxLength(2000)
   @IsNotEmpty()
   comment_content: string;
 
